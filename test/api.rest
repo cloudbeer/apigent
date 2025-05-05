@@ -1,0 +1,92 @@
+@host=http://localhost:8000
+# @host=http://35.93.167.184:8866
+
+### 获取所有组
+GET {{host}}/health
+
+### 获取所有组
+GET {{host}}/api/v1/groups
+
+
+### Chat 01
+curl -X POST {{host}}/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "你好，你是谁？"
+  }'
+
+
+### Chat 01
+curl -X POST {{host}}/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "狗日的，118.111.111.111 这个 IP 是谁的？"
+  }'
+
+### Chat 02
+curl -X POST {{host}}/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "Хотелось бы узнать погоду в Чэнду"
+  }'
+
+### Chat 02
+curl -X POST {{host}}/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "兰州明天穿什么？"
+  }'
+### Chat 02
+curl -X POST {{host}}/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "r6i.xlarge 的价格？"
+  }'
+### 获取所有组
+curl https://api.openai.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+  "model": "gpt-4o-mini",
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "query-weather",
+        "description": "查询天气",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "string",
+              "description": "latitude"
+            },
+            "longitude": {
+                "type": "string",
+                "description": "longitude"
+            }
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ]
+      }
+    }
+  ],
+  "stream": true,
+  "tool_choice": "auto",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are an experienced business ticket agent, and your role is to help corporate customers purchase tickets.  Current time: 2024-11-13T08:13:17.778Z."
+    },
+    {
+      "role": "user",
+      "content": "我想查询北京的天气和当地的重力加速度"
+    }
+  ]
+}'
+
+### 示例响应
+# 这里是示例响应数据，不包含实际API密钥

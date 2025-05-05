@@ -1,0 +1,303 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-03-21 10:00+0800\n"
+"PO-Revision-Date: 2024-04-23 09:32+0000\n"
+"Last-Translator: \n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);\n"
+
+msgid "APIGent - API 生成服务"
+msgstr "APIGent - خدمة إنشاء واجهات برمجة التطبيقات"
+
+msgid "智能 API 生成与管理服务"
+msgstr "خدمة ذكية لإنشاء وإدارة واجهات برمجة التطبيقات"
+
+msgid "中文"
+msgstr "الصينية"
+
+msgid "English"
+msgstr "الإنجليزية"
+
+msgid "API 管理"
+msgstr "إدارة واجهات برمجة التطبيقات"
+
+msgid "测试 API"
+msgstr "اختبار واجهات برمجة التطبيقات"
+
+msgid "API 文档"
+msgstr "توثيق واجهات برمجة التطبيقات"
+
+msgid "自然语言转 API"
+msgstr "تحويل اللغة الطبيعية إلى واجهات برمجة التطبيقات"
+
+msgid "将您的自然语言描述转换为结构化的 API 接口，支持生成 API 参数生成。"
+msgstr "تحويل وصف اللغة الطبيعية إلى واجهات برمجة تطبيقات منظمة، مع دعم إنشاء معلمات واجهة برمجة التطبيقات."
+
+msgid "意图识别"
+msgstr "التعرف على النوايا"
+
+msgid "通过自然语言描述，识别用户意图，并可以发起对 API 的调用。"
+msgstr "تحديد نوايا المستخدم من خلال وصف اللغة الطبيعية وبدء استدعاءات واجهة برمجة التطبيقات."
+
+msgid "模型支持"
+msgstr "دعم النماذج"
+
+msgid "支持 OpenAI 兼容模型。"
+msgstr "دعم النماذج المتوافقة مع OpenAI."
+
+msgid "群组管理"
+msgstr "إدارة المجموعات"
+
+msgid "创建分组"
+msgstr "إنشاء مجموعة"
+
+msgid "编辑群组"
+msgstr "تحرير المجموعة"
+
+msgid "ID"
+msgstr "المعرف"
+
+msgid "名称"
+msgstr "الاسم"
+
+msgid "描述"
+msgstr "الوصف"
+
+msgid "创建时间"
+msgstr "وقت الإنشاء"
+
+msgid "操作"
+msgstr "الإجراءات"
+
+msgid "编辑"
+msgstr "تحرير"
+
+msgid "删除"
+msgstr "حذف"
+
+msgid "取消"
+msgstr "إلغاء"
+
+msgid "保存"
+msgstr "حفظ"
+
+msgid "获取群组列表失败"
+msgstr "فشل في الحصول على قائمة المجموعات"
+
+msgid "保存群组失败"
+msgstr "فشل في حفظ المجموعة"
+
+msgid "删除群组失败"
+msgstr "فشل في حذف المجموعة"
+
+msgid "确定要删除这个群组吗？"
+msgstr "هل أنت متأكد من أنك تريد حذف هذه المجموعة؟"
+
+msgid "管理面板"
+msgstr "لوحة الإدارة"
+
+msgid "仪表盘"
+msgstr "لوحة المعلومات"
+
+msgid "工具管理"
+msgstr "إدارة الأدوات"
+
+msgid "分组管理"
+msgstr "إدارة المجموعات"
+
+msgid "工具总数"
+msgstr "إجمالي الأدوات"
+
+msgid "总调用次数"
+msgstr "إجمالي الاستدعاءات"
+
+msgid "今日调用次数"
+msgstr "استدعاءات اليوم"
+
+msgid "活跃用户数"
+msgstr "عدد المستخدمين النشطين"
+
+msgid "最近活动"
+msgstr "النشاطات الأخيرة"
+
+msgid "时间"
+msgstr "الوقت"
+
+msgid "用户"
+msgstr "المستخدم"
+
+msgid "状态"
+msgstr "الحالة"
+
+msgid "成功"
+msgstr "نجاح"
+
+msgid "失败"
+msgstr "فشل"
+
+msgid "获取仪表盘数据失败"
+msgstr "فشل في الحصول على بيانات لوحة المعلومات"
+
+msgid "获取最近活动失败"
+msgstr "فشل في الحصول على النشاطات الأخيرة"
+
+msgid "创建工具"
+msgstr "إنشاء أداة"
+
+msgid "分组"
+msgstr "المجموعة"
+
+msgid "工具分类"
+msgstr "تصنيفات الأدوات"
+
+msgid "API管理"
+msgstr "إدارة واجهات برمجة التطبيقات"
+
+msgid "更新时间"
+msgstr "وقت التحديث"
+
+msgid "正在保存工具到数据库"
+msgstr "جاري حفظ الأداة في قاعدة البيانات"
+
+msgid "开始生成文本变体"
+msgstr "بدء إنشاء متغيرات النص"
+
+msgid "%(current)s/%(total)s: %(text)s"
+msgstr "%(current)s/%(total)s: %(text)s"
+
+msgid "工具创建完成"
+msgstr "اكتمل إنشاء الأداة"
+
+msgid "text_variant_system_prompt"
+msgstr ""
+"You are an expert in Arabic dialectology and linguistics, with deep knowledge of the diverse Arabic dialects across the MENA region. Please create a comprehensive list of Arabic dialectal variations based on the input product name to enhance search effectiveness across different Arabic-speaking markets.\n"
+"\n"
+"Input a clear product name in Modern Standard Arabic (فصحى) or English.\n"
+"\n"
+"For the input product name, create dialectal variations covering:\n"
+"1. Maghrebi dialects: Moroccan, Algerian, Tunisian, Libyan expressions\n"
+"2. Egyptian/Sudanese dialects: How Egyptians and Sudanese would search for this product\n"
+"3. Levantine dialects: Syrian, Lebanese, Palestinian, Jordanian expressions\n"
+"4. Gulf dialects: Saudi, Emirati, Kuwaiti, Bahraini, Qatari, Omani expressions\n"
+"5. Iraqi dialects: Both northern and southern Iraqi expressions\n"
+"6. Yemeni dialects: Various regional Yemeni expressions\n"
+"7. Colloquial variations: Everyday spoken forms across different regions\n"
+"8. Common misspellings: Typical typing errors when searching in Arabic\n"
+"\n"
+"Each variation should be on a separate line without any labeling or categorization. Provide at least 50 variations covering all major Arabic dialect groups. Ensure the variations represent authentic dialectal usage as would be naturally typed by users from different Arabic-speaking regions when searching for this product.\n"
+"\n"
+"Please output a mixed list of variations that would help an e-commerce platform serve customers from all Arabic-speaking regions."
+
+
+msgid "字段管理"
+msgstr "إدارة الحقول"
+
+msgid "创建字段"
+msgstr "إنشاء حقل"
+
+msgid "加载中..."
+msgstr "جاري التحميل..."
+
+msgid "格式"
+msgstr "التنسيق"
+
+msgid "是否必填"
+msgstr "مطلوب"
+
+msgid "是否数组"
+msgstr "مصفوفة"
+
+msgid "默认值"
+msgstr "القيمة الافتراضية"
+
+msgid "数组元素类型"
+msgstr "نوع عنصر المصفوفة"
+
+msgid "数组元素格式"
+msgstr "تنسيق عنصر المصفوفة"
+
+msgid "最小元素数"
+msgstr "الحد الأدنى للعناصر"
+
+msgid "最大元素数"
+msgstr "الحد الأقصى للعناصر"
+
+msgid "元素是否唯一"
+msgstr "عناصر فريدة"
+
+msgid "最小值"
+msgstr "الحد الأدنى"
+
+msgid "最大值"
+msgstr "الحد الأقصى"
+
+msgid "倍数"
+msgstr "مضاعف"
+
+msgid "最小长度"
+msgstr "الحد الأدنى للطول"
+
+msgid "最大长度"
+msgstr "الحد الأقصى للطول"
+
+msgid "正则表达式"
+msgstr "التعبير النمطي"
+
+msgid "是否可空"
+msgstr "قابل للإلغاء"
+
+msgid "是否已废弃"
+msgstr "مهمل"
+
+msgid "是否允许空值"
+msgstr "السماح بقيمة فارغة"
+
+msgid "引用工具"
+msgstr "أداة المرجع"
+
+msgid "引用路径"
+msgstr "مسار المرجع"
+
+msgid "示例值"
+msgstr "قيمة المثال"
+
+msgid "无"
+msgstr "لا شيء"
+
+msgid "是"
+msgstr "نعم"
+
+msgid "否"
+msgstr "لا"
+
+msgid "获取工具信息失败"
+msgstr "فشل في الحصول على معلومات الأداة"
+
+msgid "获取字段列表失败"
+msgstr "فشل في الحصول على قائمة الحقول"
+
+msgid "获取工具列表失败"
+msgstr "فشل في الحصول على قائمة الأدوات"
+
+msgid "获取字段信息失败"
+msgstr "فشل في الحصول على معلومات الحقل"
+
+msgid "保存字段失败"
+msgstr "فشل في حفظ الحقل"
+
+msgid "确定要删除这个字段吗？"
+msgstr "هل أنت متأكد من أنك تريد حذف هذا الحقل؟"
+
+msgid "删除字段失败"
+msgstr "فشل في حذف الحقل"
+
+msgid "编辑字段"
+msgstr "تحرير الحقل"
+
+msgid "工具测试"
+msgstr "اختبار الأدوات"

@@ -1,0 +1,438 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ _('工具管理') }}{% endblock %}
+
+{% block page_title %}{{ _('工具管理') }}{% endblock %}
+
+{% block page_actions %}
+<button onclick="showCreateModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+    <i class="fas fa-plus mr-2"></i>{{ _('创建工具') }}
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- 工具列表 -->
+<div class="bg-white rounded-lg shadow-md p-6">
+    <div class="overflow-x-auto">
+        <table class="min-w-full">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('ID') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('名称') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('分组') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('更新时间') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('操作') }}</th>
+                </tr>
+            </thead>
+            <tbody id="toolList" class="bg-white divide-y divide-gray-200">
+                <!-- 数据将通过 JavaScript 动态加载 -->
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- 创建/编辑模态框 -->
+<div id="toolModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-[90%] md:w-3/5 shadow-lg rounded-md bg-white">
+        <!-- 加载遮罩层 -->
+        <div id="loadingOverlay"
+            class="absolute inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+                <p id="loadingMessage" class="mt-4 text-white text-lg"></p>
+            </div>
+        </div>
+        <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900 mb-4" id="modalTitle">{{ _('创建工具') }}</h3>
+            <form id="toolForm" class="space-y-4">
+                <input type="hidden" id="toolId">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">{{ _('名称') }}</label>
+                    <input type="text" id="toolName" required class="form-input">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">{{ _('描述') }}</label>
+                    <textarea id="toolDescription" required class="form-input"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">{{ _('HTTP方法') }}</label>
+                    <select id="toolHttpMethod" class="form-input">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">{{ _('URL') }}</label>
+                    <input type="text" id="toolUrl" class="form-input">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">{{ _('HTTP Context') }}</label>
+                    <textarea id="toolHttpContext" class="form-input">{}</textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">{{ _('分类') }}</label>
+                    <select id="toolGroupId" class="form-input">
+                        <option value="">{{ _('无') }}</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="hideModal()"
+                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg">{{ _('取消') }}</button>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">{{
+                        _('保存') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 变体查看模态框 -->
+<div id="variantsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-[90%] md:w-4/5 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">{{ _('文本变体') }}</h3>
+                <div class="flex items-center space-x-2">
+                    <button onclick="showAddVariantModal()"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-sm">
+                        <i class="fas fa-plus mr-1"></i>{{ _('新增变体') }}
+                    </button>
+                    <button onclick="hideVariantsModal()" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="space-y-4">
+                <div id="variantsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <!-- 变体列表将通过 JavaScript 动态加载 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 新增/编辑变体模态框 -->
+<div id="variantModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-[90%] md:w-3/5 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900 mb-4" id="variantModalTitle">{{ _('新增变体') }}</h3>
+            <form id="variantForm" class="space-y-4">
+                <input type="hidden" id="variantId">
+                <input type="hidden" id="variantToolId">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">{{ _('变体文本') }}</label>
+                    <textarea id="variantText" required class="form-input"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="hideVariantModal()"
+                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg">{{ _('取消') }}</button>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">{{
+                        _('保存') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/confirm.js"></script>
+<script src="/static/js/alert.js"></script>
+<script>
+    // 获取工具列表
+    async function fetchTools() {
+        try {
+            const data = await api.get('/api/tools/');
+            renderTools(data.data);
+        } catch (error) {
+            console.error('{{ _("获取工具列表失败") }}:', error);
+        }
+    }
+
+    // 获取分组列表
+    async function fetchGroups() {
+        try {
+            const data = await api.get('/api/categories/');
+            const groupSelect = document.getElementById('toolGroupId');
+            groupSelect.innerHTML = '<option value="">{{ _("无") }}</option>' +
+                data.data.map(group => `<option value="${group.id}">${group.name}</option>`).join('');
+        } catch (error) {
+            console.error('{{ _("获取分组列表失败") }}:', error);
+        }
+    }
+
+    // 渲染工具列表
+    function renderTools(tools) {
+        const tbody = document.getElementById('toolList');
+        tbody.innerHTML = tools.map(tool => `
+            <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tool.id}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${tool.name}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">${tool.category_id || '-'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(tool.updated_at).toLocaleString()}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <a href="/fields?tool_id=${tool.id}" class="text-green-600 hover:text-green-900 mr-3" title="{{ _('查看字段') }}">
+                        <i class="fas fa-list"></i>
+                    </a>
+                    <button onclick="showVariantsModal(${tool.id})" class="text-purple-600 hover:text-purple-900 mr-3" title="{{ _('查看变体') }}">
+                        <i class="fas fa-code-branch"></i>
+                    </button>
+                    <button onclick="showEditModal(${tool.id})" class="text-blue-600 hover:text-blue-900 mr-3" title="{{ _('编辑') }}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="deleteTool(${tool.id})" class="text-red-600 hover:text-red-900" title="{{ _('删除') }}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // 显示创建模态框
+    function showCreateModal() {
+        document.getElementById('modalTitle').textContent = '{{ _("创建工具") }}';
+        document.getElementById('toolForm').reset();
+        document.getElementById('toolId').value = '';
+        document.getElementById('toolModal').classList.remove('hidden');
+    }
+
+    // 显示编辑模态框
+    async function showEditModal(toolId) {
+        try {
+            const data = await api.get(`/api/tools/${toolId}`);
+            const tool = data.data;
+            document.getElementById('modalTitle').textContent = '{{ _("编辑工具") }}';
+            document.getElementById('toolId').value = tool.id;
+            document.getElementById('toolName').value = tool.name;
+            document.getElementById('toolDescription').value = tool.description;
+            document.getElementById('toolUrl').value = tool.url;
+            document.getElementById('toolHttpMethod').value = tool.http_method;
+            document.getElementById('toolGroupId').value = tool.category_id || '';
+            document.getElementById('toolHttpContext').value = JSON.stringify(tool.http_context, null, 2);
+            document.getElementById('toolModal').classList.remove('hidden');
+        } catch (error) {
+            console.error('{{ _("获取工具信息失败") }}:', error);
+        }
+    }
+
+    // 隐藏模态框
+    function hideModal() {
+        document.getElementById('toolModal').classList.add('hidden');
+    }
+
+    // 创建或更新工具
+    document.getElementById('toolForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const toolId = document.getElementById('toolId').value;
+        const toolData = {
+            name: document.getElementById('toolName').value,
+            description: document.getElementById('toolDescription').value,
+            url: document.getElementById('toolUrl').value,
+            http_method: document.getElementById('toolHttpMethod').value,
+            category_id: document.getElementById('toolGroupId').value ? parseInt(document.getElementById('toolGroupId').value) : null,
+            http_context: JSON.parse(document.getElementById('toolHttpContext').value) || null
+        };
+
+        try {
+            // 显示加载遮罩层
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            const loadingMessage = document.getElementById('loadingMessage');
+
+            if (!toolId) {
+                // 处理 SSE 响应
+                const response = await fetch('/api/tools/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Custom-Language': localStorage.getItem('preferred_lang') || 'zh'
+                    },
+                    body: JSON.stringify(toolData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                try {
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+
+                        const message = decoder.decode(value);
+                        if (message.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(message.slice(6));
+                                loadingMessage.textContent = data.message;
+
+                                if (data.status === 'completed') {
+                                    document.getElementById('loadingOverlay').classList.add('hidden');
+                                    hideModal();
+                                    fetchTools();
+                                    break;
+                                } else if (data.status === 'error') {
+                                    document.getElementById('loadingOverlay').classList.add('hidden');
+                                    await alertDialog.show('{{ _("错误") }}', data.message || '{{ _("操作失败") }}');
+                                    break;
+                                }
+                            } catch (e) {
+                                console.error('解析 SSE 数据失败:', e, message);
+                                loadingMessage.textContent = '{{ _("处理数据时出错") }}';
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('读取 SSE 流失败:', error);
+                    loadingMessage.textContent = '{{ _("连接中断，请重试") }}';
+                } finally {
+                    reader.releaseLock();
+                }
+            } else {
+                // 处理普通响应
+                await api.put(`/api/tools/${toolId}`, toolData);
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                hideModal();
+                fetchTools();
+            }
+        } catch (error) {
+            console.error('{{ _("保存工具失败") }}:', error);
+            loadingMessage.textContent = '{{ _("保存失败，请重试") }}';
+        } finally {
+            // 隐藏加载遮罩层
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+    });
+
+    // 删除工具
+    async function deleteTool(id) {
+        const confirmed = await confirmDialog.show('{{ _("确认删除") }}', '{{ _("确定要删除这个工具吗？") }}');
+        if (!confirmed) return;
+
+        try {
+            await api.delete(`/api/tools/${id}`);
+            fetchTools();
+        } catch (error) {
+            console.error('{{ _("删除工具失败") }}:', error);
+        }
+    }
+
+    // 显示变体模态框
+    async function showVariantsModal(toolId) {
+        try {
+            const data = await api.get(`/api/tools/${toolId}/variants`);
+            const variantsList = document.getElementById('variantsList');
+            variantsList.innerHTML = data.data.map(variant => `
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-600 break-words">${variant.text_variant}</p>
+                            ${variant.is_original ? '<span class="inline-block px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full mt-1">{{ _("原始文本") }}</span>' : ''}
+                        </div>
+                        <div class="flex items-center space-x-2 ml-2">
+                            ${!variant.is_original ? `
+                                <button onclick="showEditVariantModal(${variant.id}, '${variant.text_variant.replace(/'/g, "\\'")}')" 
+                                    class="text-blue-600 hover:text-blue-900" title="{{ _('编辑') }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteVariant(${variant.id})" 
+                                    class="text-red-600 hover:text-red-900" title="{{ _('删除') }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('variantsModal').classList.remove('hidden');
+            document.getElementById('variantsModal').dataset.toolId = toolId;
+        } catch (error) {
+            console.error('{{ _("获取变体列表失败") }}:', error);
+        }
+    }
+
+    // 显示新增变体模态框
+    function showAddVariantModal() {
+        document.getElementById('variantModalTitle').textContent = '{{ _("新增变体") }}';
+        document.getElementById('variantForm').reset();
+        document.getElementById('variantId').value = '';
+        document.getElementById('variantToolId').value = document.getElementById('variantsModal').dataset.toolId;
+        document.getElementById('variantModal').classList.remove('hidden');
+    }
+
+    // 显示编辑变体模态框
+    function showEditVariantModal(variantId, text) {
+        document.getElementById('variantModalTitle').textContent = '{{ _("编辑变体") }}';
+        document.getElementById('variantId').value = variantId;
+        document.getElementById('variantText').value = text;
+        document.getElementById('variantModal').classList.remove('hidden');
+    }
+
+    // 隐藏变体模态框
+    function hideVariantsModal() {
+        document.getElementById('variantsModal').classList.add('hidden');
+    }
+
+    // 删除变体
+    async function deleteVariant(variantId) {
+        const confirmed = await confirmDialog.show('{{ _("确认删除") }}', '{{ _("确定要删除这个变体吗？") }}');
+        if (!confirmed) return;
+
+        try {
+            await api.delete(`/api/tools/variants/${variantId}`);
+            showVariantsModal(document.getElementById('variantsModal').dataset.toolId);
+        } catch (error) {
+            console.error('{{ _("删除变体失败") }}:', error);
+        }
+    }
+
+    // 处理变体表单提交
+    document.getElementById('variantForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const variantId = document.getElementById('variantId').value;
+        const toolId = document.getElementById('variantToolId').value;
+        const variantData = {
+            text_variant: document.getElementById('variantText').value
+        };
+
+        try {
+            if (variantId) {
+                await api.put(`/api/tools/variants/${variantId}`, {
+                    ...variantData,
+                    tool_id: parseInt(toolId)
+                });
+            } else {
+                await api.post('/api/tools/variants/', {
+                    ...variantData,
+                    tool_id: parseInt(toolId)
+                });
+            }
+            hideVariantModal();
+            showVariantsModal(toolId);
+        } catch (error) {
+            console.error('{{ _("保存变体失败") }}:', error);
+        }
+    });
+
+    // 隐藏新增变体模态框
+    function hideVariantModal() {
+        document.getElementById('variantModal').classList.add('hidden');
+    }
+
+    // 页面加载时获取工具列表和分组列表
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchTools();
+        fetchGroups();
+    });
+</script>
+{% endblock %}

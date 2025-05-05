@@ -1,0 +1,413 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ _('字段管理') }}{% endblock %}
+
+{% block page_title %}
+<span id="toolName">{{ _('加载中...') }}</span>
+{% endblock %}
+
+{% block page_actions %}
+<button onclick="showCreateModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+    <i class="fas fa-plus mr-2"></i>{{ _('创建字段') }}
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- 字段列表 -->
+<div class="bg-white rounded-lg shadow-md p-6" data-tool-id="{{ tool_id }}">
+    <div class="overflow-x-auto">
+        <table class="min-w-full">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('ID') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('名称') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('描述') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('数据类型') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('格式') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('是否必填') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('是否数组') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('默认值') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('操作') }}</th>
+                </tr>
+            </thead>
+            <tbody id="fieldList" class="bg-white divide-y divide-gray-200">
+                <!-- 数据将通过 JavaScript 动态加载 -->
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- 创建/编辑模态框 -->
+<div id="fieldModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-3/4 max-w-4xl shadow-lg rounded-md bg-white z-50">
+        <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900 mb-4" id="modalTitle">{{ _('创建字段') }}</h3>
+            <form id="fieldForm" class="space-y-4">
+                <input type="hidden" id="fieldId">
+
+                <!-- 基本信息 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('名称') }}</label>
+                        <input type="text" id="fieldName" required class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('数据类型') }}</label>
+                        <select id="fieldDataType" required class="form-input">
+                            <option value="string">string</option>
+                            <option value="number">number</option>
+                            <option value="boolean">boolean</option>
+                            <option value="object">object</option>
+                            <option value="array">array</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">{{ _('描述') }}</label>
+                    <textarea id="fieldDescription" required class="form-input"></textarea>
+                </div>
+
+                <!-- 格式和基本属性 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('格式') }}</label>
+                        <input type="text" id="fieldFormat" class="form-input" placeholder="date-time, email, uuid">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('是否必填') }}</label>
+                        <input type="checkbox" id="fieldIsRequired" class="form-checkbox mt-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('是否数组') }}</label>
+                        <input type="checkbox" id="fieldIsArray" class="form-checkbox mt-2">
+                    </div>
+                </div>
+
+                <!-- 数组相关属性 -->
+                <div id="arrayFields" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('数组元素类型') }}</label>
+                        <select id="fieldArrayItemsType" class="form-input">
+                            <option value="string">string</option>
+                            <option value="number">number</option>
+                            <option value="boolean">boolean</option>
+                            <option value="object">object</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('数组元素格式') }}</label>
+                        <input type="text" id="fieldArrayItemsFormat" class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('最小元素数') }}</label>
+                        <input type="number" id="fieldMinItems" class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('最大元素数') }}</label>
+                        <input type="number" id="fieldMaxItems" class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('元素是否唯一') }}</label>
+                        <input type="checkbox" id="fieldUniqueItems" class="form-checkbox mt-2">
+                    </div>
+                </div>
+
+                <!-- 数值约束 -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('最小值') }}</label>
+                        <input type="number" id="fieldMinimum" class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('最大值') }}</label>
+                        <input type="number" id="fieldMaximum" class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('倍数') }}</label>
+                        <input type="number" id="fieldMultipleOf" class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('默认值') }}</label>
+                        <input type="text" id="fieldDefaultValue" class="form-input">
+                    </div>
+                </div>
+
+                <!-- 字符串约束 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('最小长度') }}</label>
+                        <input type="number" id="fieldMinLength" class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('最大长度') }}</label>
+                        <input type="number" id="fieldMaxLength" class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('正则表达式') }}</label>
+                        <input type="text" id="fieldPattern" class="form-input">
+                    </div>
+                </div>
+
+                <!-- 其他属性 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('是否可空') }}</label>
+                        <input type="checkbox" id="fieldNullable" class="form-checkbox mt-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('是否已废弃') }}</label>
+                        <input type="checkbox" id="fieldDeprecated" class="form-checkbox mt-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('是否允许空值') }}</label>
+                        <input type="checkbox" id="fieldAllowEmptyValue" class="form-checkbox mt-2">
+                    </div>
+                </div>
+
+                <!-- 引用相关 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('引用工具') }}</label>
+                        <select id="fieldReferenceToolId" class="form-input">
+                            <option value="">{{ _('无') }}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ _('引用路径') }}</label>
+                        <input type="text" id="fieldReferencePath" class="form-input">
+                    </div>
+                </div>
+
+                <!-- 示例值 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">{{ _('示例值') }}</label>
+                    <textarea id="fieldExample" class="form-input"></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="hideModal()"
+                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg">{{ _('取消') }}</button>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">{{
+                        _('保存') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 获取工具信息
+    async function fetchToolInfo() {
+        try {
+            const toolId = document.querySelector('[data-tool-id]').dataset.toolId;
+            const data = await api.get(`/api/tools/${toolId}`);
+            document.getElementById('toolName').textContent = data.data.name;
+        } catch (error) {
+            console.error('{{ _("获取工具信息失败") }}:', error);
+            document.getElementById('toolName').textContent = '{{ _("获取工具信息失败") }}';
+        }
+    }
+
+    // 页面加载时获取工具信息
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchToolInfo();
+        fetchFields();
+        fetchTools();
+
+        // 监听数组类型变化
+        document.getElementById('fieldIsArray').addEventListener('change', function (e) {
+            document.getElementById('arrayFields').classList.toggle('hidden', !e.target.checked);
+        });
+    });
+
+    // 获取字段列表
+    async function fetchFields() {
+        try {
+            const toolId = document.querySelector('[data-tool-id]').dataset.toolId;
+            const data = await api.get(`/api/fields/?tool_id=${toolId}`);
+            renderFields(data.data);
+        } catch (error) {
+            console.error('{{ _("获取字段列表失败") }}:', error);
+        }
+    }
+
+    // 获取工具列表（用于引用工具选择）
+    async function fetchTools() {
+        try {
+            const data = await api.get('/api/tools/');
+            const toolSelect = document.getElementById('fieldReferenceToolId');
+            toolSelect.innerHTML = '<option value="">{{ _("无") }}</option>' +
+                data.data.map(tool => `<option value="${tool.id}">${tool.name}</option>`).join('');
+        } catch (error) {
+            console.error('{{ _("获取工具列表失败") }}:', error);
+        }
+    }
+
+    // 渲染字段列表
+    function renderFields(fields) {
+        const tbody = document.getElementById('fieldList');
+        tbody.innerHTML = fields.map(field => `
+            <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${field.id}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${field.name}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">${field.description}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">${field.data_type}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">${field.format || '-'}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">${field.is_required ? '{{ _("是") }}' : '{{ _("否") }}'}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">${field.is_array ? '{{ _("是") }}' : '{{ _("否") }}'}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">${field.default_value || '-'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button onclick="showEditModal(${field.id})" class="text-blue-600 hover:text-blue-900 mr-3" title="{{ _('编辑') }}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="deleteField(${field.id})" class="text-red-600 hover:text-red-900" title="{{ _('删除') }}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // 显示创建模态框
+    function showCreateModal() {
+        document.getElementById('modalTitle').textContent = '{{ _("创建字段") }}';
+        document.getElementById('fieldForm').reset();
+        document.getElementById('fieldId').value = '';
+        document.getElementById('arrayFields').classList.add('hidden');
+        document.getElementById('fieldModal').classList.remove('hidden');
+    }
+
+    // 显示编辑模态框
+    async function showEditModal(fieldId) {
+        try {
+            const data = await api.get(`/api/fields/${fieldId}`);
+            const field = data.data;
+
+            // 设置基本字段
+            document.getElementById('modalTitle').textContent = '{{ _("编辑字段") }}';
+            document.getElementById('fieldId').value = field.id;
+            document.getElementById('fieldName').value = field.name;
+            document.getElementById('fieldDescription').value = field.description;
+            document.getElementById('fieldDataType').value = field.data_type;
+            document.getElementById('fieldFormat').value = field.format || '';
+            document.getElementById('fieldIsRequired').checked = field.is_required;
+            document.getElementById('fieldIsArray').checked = field.is_array;
+            document.getElementById('fieldDefaultValue').value = field.default_value || '';
+
+            // 设置数组相关字段
+            document.getElementById('arrayFields').classList.toggle('hidden', !field.is_array);
+            if (field.is_array) {
+                document.getElementById('fieldArrayItemsType').value = field.array_items_type || '';
+                document.getElementById('fieldArrayItemsFormat').value = field.array_items_format || '';
+                document.getElementById('fieldMinItems').value = field.min_items || '';
+                document.getElementById('fieldMaxItems').value = field.max_items || '';
+                document.getElementById('fieldUniqueItems').checked = field.unique_items;
+            }
+
+            // 设置数值约束
+            document.getElementById('fieldMinimum').value = field.minimum || '';
+            document.getElementById('fieldMaximum').value = field.maximum || '';
+            document.getElementById('fieldMultipleOf').value = field.multiple_of || '';
+
+            // 设置字符串约束
+            document.getElementById('fieldMinLength').value = field.min_length || '';
+            document.getElementById('fieldMaxLength').value = field.max_length || '';
+            document.getElementById('fieldPattern').value = field.pattern || '';
+
+            // 设置其他属性
+            document.getElementById('fieldNullable').checked = field.nullable;
+            document.getElementById('fieldDeprecated').checked = field.deprecated;
+            document.getElementById('fieldAllowEmptyValue').checked = field.allow_empty_value;
+
+            // 设置引用相关
+            document.getElementById('fieldReferenceToolId').value = field.reference_tool_id || '';
+            document.getElementById('fieldReferencePath').value = field.reference_path || '';
+
+            // 设置示例值
+            document.getElementById('fieldExample').value = field.example || '';
+
+            document.getElementById('fieldModal').classList.remove('hidden');
+        } catch (error) {
+            console.error('{{ _("获取字段信息失败") }}:', error);
+        }
+    }
+
+    // 隐藏模态框
+    function hideModal() {
+        document.getElementById('fieldModal').classList.add('hidden');
+    }
+
+    // 创建或更新字段
+    document.getElementById('fieldForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fieldId = document.getElementById('fieldId').value;
+        const toolId = document.querySelector('[data-tool-id]').dataset.toolId;
+
+        const fieldData = {
+            tool_id: parseInt(toolId),
+            name: document.getElementById('fieldName').value,
+            description: document.getElementById('fieldDescription').value,
+            data_type: document.getElementById('fieldDataType').value,
+            format: document.getElementById('fieldFormat').value || null,
+            is_required: document.getElementById('fieldIsRequired').checked,
+            is_array: document.getElementById('fieldIsArray').checked,
+            array_items_type: document.getElementById('fieldArrayItemsType').value || null,
+            array_items_format: document.getElementById('fieldArrayItemsFormat').value || null,
+            default_value: document.getElementById('fieldDefaultValue').value || null,
+            minimum: document.getElementById('fieldMinimum').value ? parseFloat(document.getElementById('fieldMinimum').value) : null,
+            maximum: document.getElementById('fieldMaximum').value ? parseFloat(document.getElementById('fieldMaximum').value) : null,
+            min_length: document.getElementById('fieldMinLength').value ? parseInt(document.getElementById('fieldMinLength').value) : null,
+            max_length: document.getElementById('fieldMaxLength').value ? parseInt(document.getElementById('fieldMaxLength').value) : null,
+            pattern: document.getElementById('fieldPattern').value || null,
+            min_items: document.getElementById('fieldMinItems').value ? parseInt(document.getElementById('fieldMinItems').value) : null,
+            max_items: document.getElementById('fieldMaxItems').value ? parseInt(document.getElementById('fieldMaxItems').value) : null,
+            unique_items: document.getElementById('fieldUniqueItems').checked,
+            multiple_of: document.getElementById('fieldMultipleOf').value ? parseFloat(document.getElementById('fieldMultipleOf').value) : null,
+            nullable: document.getElementById('fieldNullable').checked,
+            deprecated: document.getElementById('fieldDeprecated').checked,
+            allow_empty_value: document.getElementById('fieldAllowEmptyValue').checked,
+            reference_tool_id: document.getElementById('fieldReferenceToolId').value ? parseInt(document.getElementById('fieldReferenceToolId').value) : null,
+            reference_path: document.getElementById('fieldReferencePath').value || null,
+            example: document.getElementById('fieldExample').value || null
+        };
+
+        try {
+            if (fieldId) {
+                await api.put(`/api/fields/${fieldId}`, fieldData);
+            } else {
+                await api.post('/api/fields/', fieldData);
+            }
+            hideModal();
+            fetchFields();
+        } catch (error) {
+            console.error('{{ _("保存字段失败") }}:', error);
+        }
+    });
+
+    // 删除字段
+    async function deleteField(id) {
+        if (!confirm('{{ _("确定要删除这个字段吗？") }}')) return;
+
+        try {
+            await api.delete(`/api/fields/${id}`);
+            fetchFields();
+        } catch (error) {
+            console.error('{{ _("删除字段失败") }}:', error);
+        }
+    }
+</script>
+{% endblock %}

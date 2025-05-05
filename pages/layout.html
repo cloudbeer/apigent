@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/images/logo.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/images/logo.svg">
+    <link href="https://cdn.bootcdn.net/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+
+    <script src="/static/js/http.js"></script>
+    <script>
+        // 页面加载时检查 localStorage 中的语言设置
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedLang = localStorage.getItem('preferred_lang');
+            if (savedLang) {
+                const currentLang = new URLSearchParams(window.location.search).get('lang');
+                if (currentLang !== savedLang) {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    urlParams.set('lang', savedLang);
+                    window.location.href = window.location.pathname + '?' + urlParams.toString();
+                }
+            }
+        });
+
+        // 语言切换处理函数
+        function handleLanguageChange(value) {
+            localStorage.setItem('preferred_lang', value);
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('lang', value);
+            window.location.href = window.location.pathname + '?' + urlParams.toString();
+        }
+    </script>
+    <style>
+        .form-input {
+            margin-top: 0.25rem;
+            display: block;
+            width: 100%;
+            border-radius: 0.375rem;
+            border-color: #D1D5DB;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            padding: 0.5rem 0.75rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="bg-gray-100">
+    <!-- 顶部导航条 -->
+    <div class="bg-white shadow-md fixed top-0 right-0 left-0 h-16 z-10">
+        <div class="flex justify-between items-center h-full px-6">
+            <div class="flex items-center">
+                <a href="/"><img src="/static/images/logo.svg" class="w-8 h-8 mr-2" alt="APIG·RUN Logo"></a>
+                <h1 class="text-xl font-bold text-gray-800">APIG·RUN</h1>
+            </div>
+            <div class="relative">
+                <select onchange="handleLanguageChange(this.value)"
+                    class="w-48 h-10 px-4 pr-8 border border-gray-300 rounded-md appearance-none bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="zh" {{ 'selected' if lang=='zh' }}>中文 (ZH)</option>
+                    <option value="en" {{ 'selected' if lang=='en' }}>English (EN)</option>
+                    <option value="ar" {{ 'selected' if lang=='ar' }}>العربية (AR)</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                    <i class="fas fa-chevron-down text-gray-500"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-lg h-screen w-64 fixed left-0 top-16 z-10">
+
+        <nav class="mt-4">
+            <a href="/manage-api"
+                class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 {{ 'bg-blue-50 text-blue-600' if active_page == 'manage-api' }}">
+                <i class="fas fa-tachometer-alt mr-3"></i>
+                {{ _('仪表盘') }}
+            </a>
+            <a href="/categories"
+                class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 {{ 'bg-blue-50 text-blue-600' if active_page == 'group' }}">
+                <i class="fas fa-users mr-3"></i>
+                {{ _('工具分类') }}
+            </a>
+            <a href="/tools"
+                class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 {{ 'bg-blue-50 text-blue-600' if active_page == 'tools' }}">
+                <i class="fas fa-tools mr-3"></i>
+                {{ _('工具管理') }}
+            </a>
+            <a href="/chatbox"
+                class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 {{ 'bg-blue-50 text-blue-600' if active_page == 'chatbox' }}">
+                <i class="fas fa-comments mr-3"></i>
+                {{ _('工具测试') }}
+            </a>
+        </nav>
+    </div>
+
+    <div class="ml-64 p-8 mt-16">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">{% block page_title %}{% endblock %}</h1>
+            <div class="flex items-center space-x-4">
+                {% block page_actions %}{% endblock %}
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        {% block content %}{% endblock %}
+    </div>
+
+    {% block modals %}{% endblock %}
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
