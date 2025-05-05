@@ -24,6 +24,33 @@ async def manage_api(request: Request, lang: str = "zh"):
     )
 
 
+@router.get("/chat-sessions", response_class=HTMLResponse)
+async def chat_sessions(request: Request, lang: str = "zh"):
+    """渲染会话列表"""
+    translations = get_translations(lang)
+    return templates.TemplateResponse(
+        "chat-sessions.html",
+        {
+            "request": request,
+            "lang": lang,
+            "_": translations.gettext
+        }
+    )
+
+@router.get("/chat-histories", response_class=HTMLResponse)
+async def chat_histories(request: Request, lang: str = "zh"):
+    """渲染聊天历史页面"""
+    translations = get_translations(lang)
+    return templates.TemplateResponse(
+        "chat-histories.html",
+        {
+            "request": request,
+            "lang": lang,
+            "_": translations.gettext
+        }
+    )
+
+
 @router.get("/manage-api", response_class=HTMLResponse)
 async def manage_api(request: Request, lang: str = "zh"):
     """渲染主页"""

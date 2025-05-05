@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
-from app.routers import category, field, pages, tool, chat
+from app.routers import category, field, pages, tool, chat, chat_session, chat_history
 from app.utils.pg import init_pool
 import os
 import logging
@@ -30,6 +30,8 @@ app.include_router(category.router, prefix="/api/categories", tags=["abigent"])
 app.include_router(tool.router, prefix="/api/tools", tags=["abigent"])
 app.include_router(field.router, prefix="/api/fields", tags=["abigent"])
 app.include_router(chat.router, prefix="/api/chat", tags=["abigent"])
+app.include_router(chat_session.router, prefix="/api/chat-sessions", tags=["abigent"])
+app.include_router(chat_history.router, prefix="/api/chat-histories", tags=["abigent"])
 app.include_router(pages.router)
 
 @app.get("/health")

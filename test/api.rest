@@ -1,4 +1,4 @@
-@host=http://localhost:8000
+@host=http://localhost:8901
 # @host=http://35.93.167.184:8866
 
 ### 获取所有组
@@ -90,3 +90,10 @@ curl https://api.openai.com/v1/chat/completions \
 
 ### 示例响应
 # 这里是示例响应数据，不包含实际API密钥
+
+### GET chat-sessions
+GET {{host}}/api/chat-sessions
+
+### POST chat-sessions
+POST {{host}}/api/chat-sessions
+

@@ -22,6 +22,6 @@ CREATE TABLE IF NOT EXISTS apigent_chat_history (
 );
 
 -- 创建索引以优化查询性能
-
+CREATE INDEX ON apigent_chat_session (session_id);
 CREATE INDEX ON apigent_chat_history (session_id);
 CREATE INDEX ON apigent_chat_history (tool_name);

@@ -1,0 +1,325 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ _('聊天历史记录') }}{% endblock %}
+
+{% block page_title %}{{ _('聊天历史记录') }}{% endblock %}
+
+{% block content %}
+<!-- 会话信息 -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div id="sessionInfo" class="flex flex-col md:flex-row justify-between items-start md:items-center">
+        <div>
+            <h2 class="text-xl font-semibold text-gray-800" id="sessionTitle">{{ _('加载中...') }}</h2>
+            <p class="text-gray-600 mt-1" id="sessionSummary">{{ _('加载中...') }}</p>
+        </div>
+        <div class="mt-3 md:mt-0">
+            <a href="/chat-sessions" class="text-blue-600 hover:text-blue-800">
+                <i class="fas fa-arrow-left mr-1"></i> {{ _('返回会话列表') }}
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 聊天历史记录列表 -->
+<div class="bg-white rounded-lg shadow-md p-6">
+    <div class="overflow-x-auto">
+        <table class="min-w-full">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('ID') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('请求内容') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('工具名称') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('工具参数') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('创建时间') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{
+                        _('操作') }}</th>
+                </tr>
+            </thead>
+            <tbody id="historyList" class="bg-white divide-y divide-gray-200">
+                <!-- 数据将通过 JavaScript 动态加载 -->
+            </tbody>
+        </table>
+        <!-- 分页控件 -->
+        <div class="mt-4 flex justify-between items-center">
+            <div class="text-sm text-gray-500">
+                {{ _('总计') }}: <span id="totalHistories">0</span> {{ _('条记录') }}
+            </div>
+            <div class="flex space-x-2">
+                <button id="prevPage"
+                    class="px-3 py-1 bg-gray-200 rounded-md text-gray-700 hover:bg-gray-300 disabled:opacity-50">
+                    {{ _('上一页') }}
+                </button>
+                <span class="px-3 py-1 bg-gray-100 rounded-md">
+                    {{ _('第') }} <span id="currentPage">1</span> {{ _('页') }}
+                </span>
+                <button id="nextPage"
+                    class="px-3 py-1 bg-gray-200 rounded-md text-gray-700 hover:bg-gray-300 disabled:opacity-50">
+                    {{ _('下一页') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- 查看详情模态框 -->
+<div id="detailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-[90%] md:w-4/5 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">{{ _('聊天详情') }}</h3>
+                <button onclick="hideDetailModal()" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <h4 class="text-md font-medium text-gray-700">{{ _('请求内容') }}</h4>
+                    <div id="requestContent" class="mt-2 p-3 bg-gray-50 rounded-md text-gray-800 whitespace-pre-wrap">
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-md font-medium text-gray-700">{{ _('响应内容') }}</h4>
+                    <div id="responseContent" class="mt-2 p-3 bg-gray-50 rounded-md text-gray-800 whitespace-pre-wrap">
+                    </div>
+                </div>
+                <div id="toolSection" class="hidden">
+                    <h4 class="text-md font-medium text-gray-700">{{ _('工具信息') }}</h4>
+                    <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">{{ _('工具名称') }}</p>
+                            <p id="toolName" class="text-gray-800"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">{{ _('参数') }}</p>
+                            <pre id="toolParameters" class="text-xs bg-gray-50 p-2 rounded-md overflow-x-auto"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/confirm.js"></script>
+<script src="/static/js/alert.js"></script>
+<script>
+    // 获取URL参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+
+    if (!sessionId) {
+        window.location.href = '/chat-sessions';
+    }
+
+    // 分页变量
+    let currentPage = 1;
+    const pageSize = 50;
+    let totalRecords = 0;
+
+    // 获取会话信息
+    async function fetchSessionInfo() {
+        try {
+            const data = await api.get(`/api/chat-sessions/${sessionId}`);
+            const session = data.data;
+            document.getElementById('sessionTitle').textContent = session.title;
+            document.getElementById('sessionSummary').textContent = session.case_summary || '{{ _("无摘要") }}';
+        } catch (error) {
+            console.error('{{ _("获取会话信息失败") }}:', error);
+            document.getElementById('sessionTitle').textContent = '{{ _("获取会话信息失败") }}';
+            document.getElementById('sessionSummary').textContent = '{{ _("请返回会话列表重试") }}';
+        }
+    }
+
+    // 获取聊天历史记录列表
+    async function fetchHistories() {
+        try {
+            const offset = (currentPage - 1) * pageSize;
+            const data = await api.get(`/api/chat-histories/?session_id=${sessionId}&offset=${offset}&limit=${pageSize}`);
+            renderHistories(data.data);
+            totalRecords = data.total;
+            document.getElementById('totalHistories').textContent = totalRecords;
+            updatePagination();
+        } catch (error) {
+            console.error('{{ _("获取聊天历史记录失败") }}:', error);
+            await alertDialog.show('{{ _("错误") }}', '{{ _("获取聊天历史记录失败") }}');
+        }
+    }
+
+    // 渲染聊天历史记录列表
+    function renderHistories(histories) {
+        const tbody = document.getElementById('historyList');
+        if (histories.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">{{ _('暂无数据') }}</td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = histories.map(history => {
+            // 提取最后一个用户消息
+            let lastUserMessage = '';
+            if (history.request_content && typeof history.request_content === 'object' && history.request_content.messages) {
+                // 从后向前查找最后一个用户消息
+                for (let i = history.request_content.messages.length - 1; i >= 0; i--) {
+                    const message = history.request_content.messages[i];
+                    if (message.role === 'user') {
+                        lastUserMessage = message.content;
+                        break;
+                    }
+                }
+            } else {
+                // 如果不是预期的格式，则使用原始内容
+                lastUserMessage = typeof history.request_content === 'string'
+                    ? history.request_content
+                    : JSON.stringify(history.request_content);
+            }
+
+            // 截断请求内容，只显示前30个字符
+            const shortRequestContent = lastUserMessage.length > 30
+                ? lastUserMessage.substring(0, 30) + '...'
+                : lastUserMessage;
+
+            return `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${history.id}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${shortRequestContent}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${history.tool_name || '-'}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${history.parameters ? JSON.stringify(history.parameters) : '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(history.created_at).toLocaleString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="showDetailModal(${history.id})" class="text-blue-600 hover:text-blue-900 mr-3" title="{{ _('查看详情') }}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="deleteHistory(${history.id})" class="text-red-600 hover:text-red-900" title="{{ _('删除') }}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // 显示详情模态框
+    async function showDetailModal(historyId) {
+        try {
+            const data = await api.get(`/api/chat-histories/${historyId}`);
+            const history = data.data;
+
+            // 处理请求内容显示
+            let requestContentDisplay = '';
+            if (history.request_content && typeof history.request_content === 'object' && history.request_content.messages) {
+                // 格式化消息对话
+                requestContentDisplay = history.request_content.messages.map(msg =>
+                    `${msg.role}: ${msg.content}`
+                ).join('\n\n');
+            } else {
+                requestContentDisplay = typeof history.request_content === 'string'
+                    ? history.request_content
+                    : JSON.stringify(history.request_content, null, 2);
+            }
+
+            document.getElementById('requestContent').textContent = requestContentDisplay;
+            document.getElementById('responseContent').textContent = history.response_content || '{{ _("无响应内容") }}';
+
+            // 处理工具信息
+            const toolSection = document.getElementById('toolSection');
+            if (history.tool_name) {
+                document.getElementById('toolName').textContent = history.tool_name;
+
+                // 格式化参数JSON
+                let parameters = '';
+                try {
+                    if (history.parameters) {
+                        const paramsObj = typeof history.parameters === 'string'
+                            ? JSON.parse(history.parameters)
+                            : history.parameters;
+                        parameters = JSON.stringify(paramsObj, null, 2);
+                    }
+                } catch (e) {
+                    parameters = history.parameters || '';
+                }
+
+                document.getElementById('toolParameters').textContent = parameters || '{{ _("无参数") }}';
+                toolSection.classList.remove('hidden');
+            } else {
+                toolSection.classList.add('hidden');
+            }
+
+            document.getElementById('detailModal').classList.remove('hidden');
+        } catch (error) {
+            console.error('{{ _("获取聊天历史记录详情失败") }}:', error);
+            await alertDialog.show('{{ _("错误") }}', '{{ _("获取聊天历史记录详情失败") }}');
+        }
+    }
+
+    // 隐藏详情模态框
+    function hideDetailModal() {
+        document.getElementById('detailModal').classList.add('hidden');
+    }
+
+    // 删除聊天历史记录
+    async function deleteHistory(historyId) {
+        const confirmed = await confirmDialog.show('{{ _("确认删除") }}', '{{ _("确定要删除这条聊天历史记录吗？") }}');
+        if (!confirmed) return;
+
+        try {
+            await api.delete(`/api/chat-histories/${historyId}`);
+            await alertDialog.show('{{ _("成功") }}', '{{ _("聊天历史记录已删除") }}');
+            fetchHistories();
+        } catch (error) {
+            console.error('{{ _("删除聊天历史记录失败") }}:', error);
+            await alertDialog.show('{{ _("错误") }}', '{{ _("删除聊天历史记录失败") }}');
+        }
+    }
+
+    // 更新分页控件状态
+    function updatePagination() {
+        const totalPages = Math.ceil(totalRecords / pageSize);
+        document.getElementById('currentPage').textContent = currentPage;
+
+        // 禁用/启用上一页按钮
+        const prevButton = document.getElementById('prevPage');
+        prevButton.disabled = currentPage <= 1;
+
+        // 禁用/启用下一页按钮
+        const nextButton = document.getElementById('nextPage');
+        nextButton.disabled = currentPage >= totalPages;
+    }
+
+    // 上一页
+    document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            fetchHistories();
+        }
+    });
+
+    // 下一页
+    document.getElementById('nextPage').addEventListener('click', () => {
+        const totalPages = Math.ceil(totalRecords / pageSize);
+        if (currentPage < totalPages) {
+            currentPage++;
+            fetchHistories();
+        }
+    });
+
+    // 页面加载时获取会话信息和聊天历史记录列表
+    document.addEventListener('DOMContentLoaded', () => {
+        if (sessionId) {
+            fetchSessionInfo();
+            fetchHistories();
+        }
+    });
+</script>
+{% endblock %}

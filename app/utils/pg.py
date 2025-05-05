@@ -4,6 +4,7 @@ from typing import Optional, List, Any, Tuple
 from dataclasses import dataclass
 from pydantic import BaseModel
 import logging
+from psycopg.types.json import Jsonb
 # from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -103,12 +104,14 @@ def execute_one_dict(sql: str, params: tuple = ()):
 def create(table:str, data: BaseModel):
     data_dict = data.model_dump(exclude_unset=True)
     sql = f"INSERT INTO {table} ({', '.join(data_dict.keys())}) VALUES ({', '.join([f"%s" for v in data_dict.values()])}) RETURNING id"
-    return execute_one_dict(sql, tuple(data_dict.values()))
+    data_values = tuple(Jsonb(value) if isinstance(value, dict) else value for value in data_dict.values())
+    return execute_one_dict(sql, data_values)
 
 def update(table:str, id:int, data:BaseModel, columns:list[str]=["*"]):
     data_dict = data.model_dump(exclude_unset=True)
     sql = f"UPDATE {table} SET {', '.join([f"{k}=%s" for k in data_dict.keys()])} WHERE id=%s RETURNING {', '.join(columns)}"
-    return execute_one_dict(sql, tuple(data_dict.values()) + (id,))
+    data_values = tuple(Jsonb(value) if isinstance(value, dict) else value for value in data_dict.values())
+    return execute_one_dict(sql, data_values + (id,))
 
 def delete(table:str, id:int): 
     sql = f"DELETE FROM {table} WHERE id=%s"

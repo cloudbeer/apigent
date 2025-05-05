@@ -3,7 +3,7 @@ from openai import OpenAI
 import logging
 from dotenv import load_dotenv
 import json
-from openai.types.chat import ChatCompletionMessage
+from openai.types.chat import ChatCompletionMessage, ChatCompletion
 import time
 
 # 加载环境变量
@@ -94,12 +94,12 @@ def parse_tool_schemas(
         dict: 包含 OpenAI 响应和额外字段的字典
     """
     print(f"retrieved tools: {tools}")
+    response: ChatCompletion | None = None
 
     if len(tools) <= 0:
         response = client.chat.completions.create(
             model=text_generation_model,
             messages=messages,
-            tool_choice="auto",
         )
     else:
         response = client.chat.completions.create(
@@ -110,11 +110,11 @@ def parse_tool_schemas(
         )
 
         # 构建包含额外字段的响应
-        enhanced_response = {
-            "openai_response": response,
-            "timestamp": int(time.time()),
-            "model": text_generation_model,
-            "tools_used": [tool["function"]["name"] for tool in tools],
-        }
+    enhanced_response = {
+        "openai_response": response.to_dict(),
+        "timestamp": int(time.time()),
+        "model": text_generation_model,
+        "tools_used": [tool["function"]["name"] for tool in tools],
+    }
 
-        return enhanced_response
+    return enhanced_response
