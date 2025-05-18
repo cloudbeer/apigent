@@ -1,4 +1,4 @@
-@host=http://localhost:8901
+@host=http://localhost:8000
 # @host=http://35.93.167.184:8866
 
 ### 获取所有组
@@ -96,4 +96,16 @@ GET {{host}}/api/chat-sessions
 
 ### POST chat-sessions
 POST {{host}}/api/chat-sessions
+
+
+### GET chat-histories
+GET {{host}}/api/chat-histories/?session_id=chat_matb6qom_pjkrsm_moz&offset=0&limit=50
+
+
+
+### GET chat-histories
+GET {{host}}/api/chat-histories/result/?session_id=chat_matb6qom_pjkrsm_moz
+
+### POST chat-histories
+POST {{host}}/api/chat-histories
 

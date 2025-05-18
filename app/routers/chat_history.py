@@ -8,6 +8,33 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+
+@router.get("/result/")
+def read_chat_histories(session_id: str):
+    """获取指定会话的聊天历史记录"""
+    # 首先检查会话是否存在
+    session_conditions = db.QueryCondition(
+        where="session_id = %s",
+        params=(session_id,)
+    )
+    sessions = db.list("apigent_chat_session", session_conditions)
+    if not sessions:
+        raise HTTPException(status_code=404, detail="聊天会话不存在")
+    
+    # 获取历史记录
+    conditions = db.QueryCondition(
+        cols=("id", "session_id", "tool_name", "parameters", "created_at", "updated_at"),
+        where="session_id = %s and parameters is not null",
+        params=(session_id,),
+        order_by="created_at ASC"
+    )
+    histories = db.list("apigent_chat_history", conditions)
+    return {
+        "success": True,
+        "data": histories
+    }
+
+
 @router.get("/")
 def read_chat_histories(session_id: str, offset: int = 0, limit: int = 50):
     """获取指定会话的聊天历史记录"""
