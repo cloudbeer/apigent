@@ -29,7 +29,7 @@ POST /api/chat/completions
 **请求头：**
 ```
 Content-Type: application/json
-Session-ID: {会话ID}  // 可选，用于标识聊天会话
+Session-ID: {会话ID} 
 Tool: {工具名称}      // 可选，指定使用的工具
 ```
 
