@@ -27,7 +27,20 @@ def get_embedding(text: str) -> list[float]:
     )
     res = response.data[0].embedding
     logger.info(f"embedding length: {len(res)}")
-    return res
+    
+    # 处理维度不匹配问题，确保返回1536维向量
+    target_dim = 1536
+    current_dim = len(res)
+    
+    if current_dim == target_dim:
+        return res
+    elif current_dim < target_dim:
+        # 如果维度不足，通过重复或填充0来扩展
+        padding = [0.0] * (target_dim - current_dim)
+        return res + padding
+    else:
+        # 如果维度过多，截断到目标维度
+        return res[:target_dim]
 
 
 def gen_text_variant(text: str, system_prompt: str | None = None) -> list[str]:
@@ -102,6 +115,7 @@ def parse_tool_schemas(
             messages=messages,
         )
     else:
+        print(f"messages: {messages}")
         response = client.chat.completions.create(
             model=text_generation_model,
             messages=messages,
