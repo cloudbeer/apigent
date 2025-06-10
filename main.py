@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.timeout import TimeoutMiddleware
-from datetime import timedelta
+# from fastapi.middleware.timeout import TimeoutMiddleware
+# from datetime import timedelta
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from app.routers import category, field, pages, tool, chat, chat_session, chat_history
@@ -25,7 +25,7 @@ app = FastAPI(
     version="0.1.0"
 )
 
-app.add_middleware(TimeoutMiddleware, timeout=timedelta(seconds=300))
+# app.add_middleware(TimeoutMiddleware, timeout=timedelta(seconds=300))
 
 
 app.add_middleware(
