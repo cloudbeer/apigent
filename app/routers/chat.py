@@ -10,8 +10,8 @@ from app.models.chat import ChatSessionCreate, ChatHistoryCreate
 import json
 import uuid
 import time
-from psycopg.types.json import Jsonb
-from openai.types.chat import ChatCompletionMessage
+# from psycopg.types.json import Jsonb
+# from openai.types.chat import ChatCompletionMessage
 
 logger = logging.getLogger(__name__)    
 
@@ -25,35 +25,40 @@ class ChatCompletionRequest(BaseModel):
     messages: List[Message]
     temperature: Optional[float] = 0.7
     max_tokens: Optional[int] = 1000
+    stream: Optional[bool] = False
 
-@router.post("/")
-async def chat(request: ChatCompletionRequest):
-    user_messages = [msg.content for msg in request.messages if msg.role == "user"]
-    if not user_messages:
-        raise HTTPException(status_code=400, detail="No user message found in the request")
+# @router.post("/")
+# async def chat(request: ChatCompletionRequest):
+#     user_messages = [msg.content for msg in request.messages if msg.role == "user"]
+#     if not user_messages:
+#         raise HTTPException(status_code=400, detail="No user message found in the request")
     
-    text = user_messages[-1]
-    logger.info(f"Received chat request: {text}")
-    """
-    根据用户输入的文本检索相关的工具
+#     text = user_messages[-1]
+#     logger.info(f"Received chat request: {text}")
+#     """
+#     根据用户输入的文本检索相关的工具
     
-    Args:
-        text: 用户输入的查询文本
+#     Args:
+#         text: 用户输入的查询文本
         
-    Returns:
-        List[Dict[str, Any]]: 匹配的工具列表
-    """
-    try:
-        # 调用检索函数获取相关工具
-        tools = retrieve_tools_by_text(text, similarity_threshold=0.4)
-        for tool in tools:
-            logger.info(f"Tool: {tool}")
-            tool_schema = get_tool_schema(tool["id"])
-            return {"tools": [tool_schema]}
-        return {"tools": []}
-    except Exception as e:
-        logger.error(f"Error in chat endpoint: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+#     Returns:
+#         List[Dict[str, Any]]: 匹配的工具列表
+#     """
+#     try:
+#         # 调用检索函数获取相关工具
+#         tools = retrieve_tools_by_text(text, similarity_threshold=0.4)
+#         for tool in tools:
+#             logger.info(f"Tool: {tool}")
+#             tool_schema = get_tool_schema(tool["id"])
+#             return {"tools": [tool_schema]}
+#         return {"tools": []}
+#     except Exception as e:
+#         logger.error(f"Error in chat endpoint: {str(e)}")
+#         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+
 
 @router.post("/completions")
 async def chat_completions(
