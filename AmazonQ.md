@@ -296,15 +296,6 @@ CREATE INDEX ON apigent_tool_embedding USING ivfflat (embedding vector_cosine_op
 - **索引参数**: lists=100，将向量空间分为100个聚类
 - **搜索性能**: 支持高效的近似最近邻搜索
 
-#### 数据关系图
-```
-apigent_category (1) ←→ (N) apigent_tool (1) ←→ (N) apigent_field
-                                ↓ (1)
-                                ↓ (N)
-                        apigent_tool_embedding
-
-apigent_chat_session (1) ←→ (N) apigent_chat_history
-```
 
 #### 数据库初始化
 1. **基础结构**: 执行 `sql/meta.sql` 创建工具管理相关表
@@ -393,11 +384,14 @@ fastapi run main.py
 ./compile_translations.sh
 ```
 
+
+
 **说明:**
 - 翻译源文件格式为 `.po` 文件
 - 编译后生成 `.mo` 二进制文件供应用使用
 - 支持的语言包括中文、英文等
 - 修改翻译内容后需要重新编译才能生效
+- 你可能需要安装 gettext 
 
 ---
 

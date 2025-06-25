@@ -17,6 +17,7 @@ class AbigentTool(BaseModel):
 
 class AbigentToolCreate(BaseModel):
     name: str
+    key: str
     description: str
     url: str | None = None
     http_method: str | None = None
@@ -29,6 +30,7 @@ class AbigentToolCreate(BaseModel):
 # Update
 class AbigentToolUpdate(BaseModel):
     name: str | None = None
+    key: str | None = None
     description: str | None = None
     url: str | None = None
     http_method: str | None = None

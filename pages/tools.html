@@ -59,7 +59,11 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">{{ _('描述') }}</label>
-                    <textarea id="toolDescription" required class="form-input"></textarea>
+                    <textarea id="toolDescription" required class="form-input" placeholder="{{ _('工具描述') }}"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">{{ _('关键字') }}</label>
+                    <input type="text" id="toolKey" required class="form-input">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">{{ _('HTTP方法') }}</label>
@@ -235,6 +239,7 @@
         const toolId = document.getElementById('toolId').value;
         const toolData = {
             name: document.getElementById('toolName').value,
+            key: document.getElementById('toolKey').value,
             description: document.getElementById('toolDescription').value,
             url: document.getElementById('toolUrl').value,
             http_method: document.getElementById('toolHttpMethod').value,

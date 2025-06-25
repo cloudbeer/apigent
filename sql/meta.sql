@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS apigent_category (
 CREATE TABLE IF NOT EXISTS apigent_tool (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
+    key VARCHAR(255),
     description TEXT,
     url VARCHAR(1024) NOT NULL,
     http_method VARCHAR(20) NOT NULL,
