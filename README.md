@@ -22,6 +22,7 @@ fastapi dev main.py
 ### 聊天完成 API
 
 #### 发送聊天请求
+
 ```
 POST /api/chat/completions
 ```
@@ -89,6 +90,58 @@ Tool: {工具名称}      // 可选，指定使用的工具
   "tools_used": ["function_name1", "function_name2"]
 }
 ```
+
+#### 聊天（streaming）
+
+```
+POST /api/chat/completions/stream
+```
+
+**请求头：**
+```
+Content-Type: application/json
+Session-ID: {会话ID} 
+Tool: {工具名称}      // 可选，指定使用的工具
+```
+
+**请求体：**
+```json
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "用户消息内容"
+    },
+    {
+      "role": "assistant",
+      "content": "助手回复内容"
+    },
+    // 更多消息...
+  ]
+}
+```
+
+**响应 部分结果：**
+```json
+data: {"tools_used": ["waf-ban"], "timestamp": 1750911735, "type": "tools_info"}
+
+data: {"id": "chatcmpl-9a587d25-43bc-430d-9972-8bb3d6a0b8cb", "choices": [{"delta": {"content": "我"}, "finish_reason": null, "index": 0, "logprobs": null}], "created": 1750911737, "model": "sonnet37", "object": "chat.completion.chunk"}
+
+...
+
+data: {"id": "chatcmpl-9a587d25-43bc-430d-9972-8bb3d6a0b8cb", "choices": [{"delta": {"content": "："}, "finish_reason": null, "index": 0, "logprobs": null}], "created": 1750911741, "model": "sonnet37", "object": "chat.completion.chunk"}
+
+data: {"id": "chatcmpl-9a587d25-43bc-430d-9972-8bb3d6a0b8cb", "choices": [{"delta": {"role": "assistant", "tool_calls": [{"index": 0, "id": "tooluse_fv9F63pgQD6yc_9SwBpzew", "function": {"arguments": "", "name": "waf-ban"}, "type": "function"}]}, "finish_reason": null, "index": 0, "logprobs": null}], "created": 1750911741, "model": "sonnet37", "object": "chat.completion.chunk"}
+
+data: {"id": "chatcmpl-9a587d25-43bc-430d-9972-8bb3d6a0b8cb", "choices": [{"delta": {"role": "assistant", "tool_calls": [{"index": 0, "function": {"arguments": "{\"ci"}}]}, "finish_reason": null, "index": 0, "logprobs": null}], "created": 1750911742, "model": "sonnet37", "object": "chat.completion.chunk"}
+
+....
+
+data: {"id": "chatcmpl-9a587d25-43bc-430d-9972-8bb3d6a0b8cb", "choices": [{"delta": {}, "finish_reason": "tool_use", "index": 0, "logprobs": null}], "created": 1750911742, "model": "sonnet37", "object": "chat.completion.chunk", "usage": {"completion_tokens": 201, "prompt_tokens": 630, "total_tokens": 831}}
+
+data: [DONE]
+```
+
 
 ### 聊天历史结果 API
 

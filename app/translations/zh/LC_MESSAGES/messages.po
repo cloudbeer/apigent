@@ -168,6 +168,12 @@ msgstr "%(current)s/%(total)s: %(text)s"
 msgid "工具创建完成"
 msgstr "工具创建完成" 
 
+msgid "工具描述"
+msgstr "这个字段同时也是寻找此工具的提示词" 
+
+msgid "关键字描述"
+msgstr "附加字段，您可以填写服务ID，商品 code 或其他任意值" 
+
 msgid "text_variant_system_prompt"
 msgstr ""
 "作为IT工具变体生成器，你需要为指定的IT工具或服务生成不同形式的用户查询表达，以帮助训练AI向量检索系统，实现精确的意图识别。\n"

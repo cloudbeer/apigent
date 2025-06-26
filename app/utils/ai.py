@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import json
 from openai.types.chat import ChatCompletionMessage, ChatCompletion
 import time
+from typing import AsyncGenerator
 
 # 加载环境变量
 load_dotenv(override=True)
@@ -132,3 +133,54 @@ def parse_tool_schemas(
     }
 
     return enhanced_response
+
+
+async def parse_tool_schemas_stream(
+    messages: list[ChatCompletionMessage], tools: list[dict]
+) -> AsyncGenerator[dict, None]:
+    """
+    使用 OpenAI 模型解析工具调用 - 流式版本
+
+    Args:
+        messages: 对话历史
+        tools: 工具列表
+
+    Yields:
+        dict: OpenAI 流式响应的每个chunk
+    """
+    print(f"retrieved tools: {tools}")
+
+    try:
+        if len(tools) <= 0:
+            stream = client.chat.completions.create(
+                model=text_generation_model,
+                messages=messages,
+                stream=True,
+            )
+        else:
+            print(f"messages: {messages}")
+            stream = client.chat.completions.create(
+                model=text_generation_model,
+                messages=messages,
+                tools=tools,
+                tool_choice="auto",
+                stream=True,
+            )
+
+        # 逐个yield流式响应的chunk
+        for chunk in stream:
+            # 将chunk转换为字典格式
+            chunk_dict = chunk.to_dict()
+            yield chunk_dict
+            
+    except Exception as e:
+        logger.error(f"Error in streaming parse_tool_schemas: {str(e)}")
+        # 发送错误信息
+        error_chunk = {
+            "error": {
+                "message": str(e),
+                "type": "api_error",
+                "code": "stream_error"
+            }
+        }
+        yield error_chunk

@@ -173,6 +173,12 @@ msgstr "%(current)s/%(total)s: %(text)s"
 msgid "工具创建完成"
 msgstr "Tool creation completed"
 
+msgid "工具描述"
+msgstr "This field is also a prompt for finding this tool" 
+
+msgid "关键字描述"
+msgstr "Additional field, you can fill in the service ID, product code or any other value" 
+
 msgid "text_variant_system_prompt"
 msgstr ""
 "As an IT tool variant generator, you need to generate different forms of user query expressions for specified IT tools or services to help train AI vector retrieval systems for precise intent recognition.\n"
