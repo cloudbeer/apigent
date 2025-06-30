@@ -86,8 +86,13 @@ Tool: {工具名称}      // 可选，指定使用的工具
     }
   },
   "timestamp": 1698155432,
-  "model": "gpt-3.5-turbo",
-  "tools_used": ["function_name1", "function_name2"]
+  "model": "gpt-3.5-turbo", 
+  "tools_used": [
+        {
+            "name": "name1",
+            "key": "name-key1"
+        }
+    ]
 }
 ```
 
@@ -123,7 +128,7 @@ Tool: {工具名称}      // 可选，指定使用的工具
 
 **响应 部分结果：**
 ```
-data: {"tools_used": ["waf-ban"], "timestamp": 1750911735, "type": "tools_info"}
+data: {"tools_used": [{"name": "name1", "key": "key1"}], "timestamp": 1751254258, "type": "tools_info"}
 
 data: {"id": "chatcmpl-9a587d25-43bc-430d-9972-8bb3d6a0b8cb", "choices": [{"delta": {"content": "我"}, "finish_reason": null, "index": 0, "logprobs": null}], "created": 1750911737, "model": "sonnet37", "object": "chat.completion.chunk"}
 
