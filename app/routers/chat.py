@@ -272,7 +272,7 @@ async def chat_completions_stream(
             history_id = history_record["id"]
             
             # 准备工具使用信息
-            tools_used = [tool["function"]["name"] for tool in tool_schemas] if tool_schemas else []
+            tools_used = [{"name": tool["function"]["name"], "key": tool["function"]["key"]} for tool in tool_schemas] if tool_schemas else []
             
             # 首先发送工具使用信息
             if tools_used:

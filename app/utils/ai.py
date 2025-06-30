@@ -116,7 +116,7 @@ def parse_tool_schemas(
             messages=messages,
         )
     else:
-        print(f"messages: {messages}")
+        # print(f"messages: {messages}")
         response = client.chat.completions.create(
             model=text_generation_model,
             messages=messages,
@@ -129,7 +129,7 @@ def parse_tool_schemas(
         "openai_response": response.to_dict(),
         "timestamp": int(time.time()),
         "model": text_generation_model,
-        "tools_used": [tool["function"]["name"] for tool in tools],
+        "tools_used": [{"name": tool["function"]["name"], "key": tool["function"]["key"]} for tool in tools],
     }
 
     return enhanced_response

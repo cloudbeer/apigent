@@ -52,6 +52,7 @@ def get_tool_schema(tool_id: int):
         "type": "function",
         "function": {
             "name": tool["name"],
+            "key": tool["key"],
             "description": tool["description"],
             "parameters": {
                 "type": "object",

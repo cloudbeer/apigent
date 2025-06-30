@@ -841,6 +841,7 @@ def retrieve_tools_by_text(
             SELECT 
                 t.id,
                 t.name,
+                t.key,
                 t.description,
                 t.url,
                 t.http_method,
@@ -859,6 +860,7 @@ def retrieve_tools_by_text(
         SELECT 
             id,
             name,
+            key,
             description,
             url,
             http_method,
@@ -887,6 +889,7 @@ def retrieve_tools_by_text(
         SELECT 
             id,
             name,
+            key,
             description,
             url,
             http_method,
@@ -929,6 +932,7 @@ def retrieve_tool_by_id(tool_id: int) -> Optional[Dict[str, Any]]:
     SELECT 
         id,
         name,
+        key,
         description,
         url,
         http_method,
