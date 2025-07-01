@@ -54,9 +54,9 @@ def read_tool_variants(tool_id: int):
 
 @router.post("/variants/")
 def create_variant(variant: ToolEmbeddingCreate):
-    print("--------------------------------")
-    print(variant)
-    print("--------------------------------")
+    # print("--------------------------------")
+    # print(variant)
+    # print("--------------------------------")
     if variant.text_variant is None or variant.text_variant.strip() == "":
         raise HTTPException(status_code=400, detail="文本变体不能为空")
     variant.embedding = get_embedding(variant.text_variant)

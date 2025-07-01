@@ -55,7 +55,7 @@
                 <input type="hidden" id="toolId">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">{{ _('名称') }}</label>
-                    <input type="text" id="toolName" required class="form-input">
+                    <input type="text" id="toolName" required class="form-input" placeholder="{{ _('名称描述') }}">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">{{ _('描述') }}</label>
@@ -217,6 +217,7 @@
             document.getElementById('modalTitle').textContent = '{{ _("编辑工具") }}';
             document.getElementById('toolId').value = tool.id;
             document.getElementById('toolName').value = tool.name;
+            document.getElementById('toolKey').value = tool.key;
             document.getElementById('toolDescription').value = tool.description;
             document.getElementById('toolUrl').value = tool.url;
             document.getElementById('toolHttpMethod').value = tool.http_method;
