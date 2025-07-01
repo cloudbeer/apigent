@@ -1,0 +1,683 @@
+{% extends "layout.html" %}
+
+{% block title %}流式聊天助手{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        height: calc(100vh - 200px);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .messages-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+        background-color: #f9fafb;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .message {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+
+    .user-message {
+        background-color: #e3f2fd;
+        margin-left: auto;
+    }
+
+    .assistant-message {
+        background-color: white;
+        margin-right: auto;
+        border: 1px solid #e5e7eb;
+    }
+
+    .streaming-message {
+        background-color: #f0f9ff;
+        border: 1px solid #bae6fd;
+        position: relative;
+    }
+
+    .streaming-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background-color: #3b82f6;
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+        margin-left: 4px;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 1; }
+    }
+
+    .input-container {
+        display: flex;
+        gap: 0.5rem;
+        padding: 1rem;
+        background-color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .message-input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.375rem;
+        resize: none;
+        font-family: inherit;
+    }
+
+    .send-button {
+        padding: 0.75rem 1.5rem;
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        white-space: nowrap;
+    }
+
+    .send-button:hover:not(:disabled) {
+        background-color: #2563eb;
+    }
+
+    .send-button:disabled {
+        background-color: #93c5fd;
+        cursor: not-allowed;
+    }
+
+    .session-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background-color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .session-id {
+        font-family: monospace;
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+
+    .new-session-btn {
+        padding: 0.5rem 1rem;
+        background-color: #f3f4f6;
+        color: #4b5563;
+        border: none;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .new-session-btn:hover {
+        background-color: #e5e7eb;
+    }
+
+    .tools-info {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background-color: #fef3c7;
+        border: 1px solid #f59e0b;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        color: #92400e;
+    }
+
+    .tools-info-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .tool-tag {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        background-color: #3b82f6;
+        color: white;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .function-info {
+        margin-top: 0.75rem;
+        padding: 0.75rem;
+        background-color: #f3f4f6;
+        border-radius: 0.375rem;
+        border-left: 4px solid #3b82f6;
+    }
+
+    .function-title {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .function-detail {
+        margin-bottom: 0.25rem;
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    .function-args {
+        background-color: #1f2937;
+        color: #f9fafb;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        font-family: monospace;
+        font-size: 0.75rem;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+
+    .status-indicator {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        z-index: 1000;
+        transition: all 0.3s ease;
+    }
+
+    .status-connecting {
+        background-color: #fef3c7;
+        color: #92400e;
+        border: 1px solid #f59e0b;
+    }
+
+    .status-streaming {
+        background-color: #dcfce7;
+        color: #166534;
+        border: 1px solid #22c55e;
+    }
+
+    .status-error {
+        background-color: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #ef4444;
+    }
+
+    .clear-chat-btn {
+        padding: 0.5rem 1rem;
+        background-color: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        margin-left: 0.5rem;
+    }
+
+    .clear-chat-btn:hover {
+        background-color: #dc2626;
+    }
+</style>
+{% endblock %}
+
+{% block page_title %}流式聊天助手{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="session-controls">
+        <span class="session-id">会话ID: <span id="sessionId"></span></span>
+        <div>
+            <button class="new-session-btn" onclick="createNewSession()">新会话</button>
+            <button class="clear-chat-btn" onclick="clearChat()">清空对话</button>
+        </div>
+    </div>
+    
+    <div class="messages-container" id="messagesContainer">
+        <!-- 消息将在这里动态添加 -->
+    </div>
+    
+    <div class="input-container">
+        <textarea class="message-input" id="messageInput" rows="1" placeholder="输入消息... (Enter发送，Shift+Enter换行)"
+            onkeydown="handleKeyDown(event)"></textarea>
+        <button class="send-button" id="sendButton" onclick="sendMessage()">
+            <span id="sendButtonText">发送</span>
+        </button>
+    </div>
+</div>
+
+<!-- 状态指示器 -->
+<div class="status-indicator" id="statusIndicator" style="display: none;"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const messagesContainer = document.getElementById('messagesContainer');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const sendButtonText = document.getElementById('sendButtonText');
+    const sessionIdDisplay = document.getElementById('sessionId');
+    const statusIndicator = document.getElementById('statusIndicator');
+
+    let isStreaming = false;
+    let currentStreamingMessage = null;
+
+    // 生成随机会话ID
+    function generateSessionId() {
+        const timestamp = Date.now().toString(36);
+        const randomStr = Math.random().toString(36).substr(2, 6);
+        const userAgent = navigator.userAgent.substring(0, 3).toLowerCase();
+        return `stream_${timestamp}_${randomStr}_${userAgent}`;
+    }
+
+    // 创建新会话
+    function createNewSession() {
+        const newSessionId = generateSessionId();
+        localStorage.setItem('current_stream_session_id', newSessionId);
+        sessionIdDisplay.textContent = newSessionId;
+        messagesContainer.innerHTML = '';
+        localStorage.removeItem(`stream_chat_history_${newSessionId}`);
+        showStatus('新会话已创建', 'success');
+    }
+
+    // 清空对话
+    function clearChat() {
+        if (confirm('确定要清空当前对话吗？')) {
+            messagesContainer.innerHTML = '';
+            const sessionId = localStorage.getItem('current_stream_session_id');
+            if (sessionId) {
+                localStorage.removeItem(`stream_chat_history_${sessionId}`);
+            }
+            showStatus('对话已清空', 'success');
+        }
+    }
+
+    // 显示状态
+    function showStatus(message, type = 'info', duration = 3000) {
+        statusIndicator.textContent = message;
+        statusIndicator.className = `status-indicator status-${type}`;
+        statusIndicator.style.display = 'block';
+        
+        if (duration > 0) {
+            setTimeout(() => {
+                statusIndicator.style.display = 'none';
+            }, duration);
+        }
+    }
+
+    // 加载会话历史
+    function loadChatHistory() {
+        let sessionId = localStorage.getItem('current_stream_session_id');
+        if (!sessionId) {
+            sessionId = generateSessionId();
+            localStorage.setItem('current_stream_session_id', sessionId);
+        }
+        sessionIdDisplay.textContent = sessionId;
+
+        const history = localStorage.getItem(`stream_chat_history_${sessionId}`);
+        if (history) {
+            try {
+                const messages = JSON.parse(history);
+                messages.forEach(msg => addMessage(msg.content, msg.role, msg.toolCalls, msg.toolsUsed));
+            } catch (e) {
+                console.error('Failed to load chat history:', e);
+            }
+        }
+    }
+
+    // 保存会话历史
+    function saveChatHistory() {
+        const sessionId = localStorage.getItem('current_stream_session_id');
+        const messages = Array.from(messagesContainer.children).map(div => {
+            const isUser = div.classList.contains('user-message');
+            const content = div.querySelector('.message-content')?.textContent || div.textContent;
+            const toolCalls = div.querySelector('.function-info') ? 
+                Array.from(div.querySelectorAll('.function-detail')).map(el => el.textContent) : null;
+            const toolsUsed = div.querySelector('.tools-info') ? 
+                Array.from(div.querySelectorAll('.tool-tag')).map(el => el.textContent) : null;
+            
+            return {
+                role: isUser ? 'user' : 'assistant',
+                content: content,
+                toolCalls: toolCalls,
+                toolsUsed: toolsUsed
+            };
+        });
+        localStorage.setItem(`stream_chat_history_${sessionId}`, JSON.stringify(messages));
+    }
+
+    // 添加消息
+    function addMessage(content, role, toolCalls = null, toolsUsed = null) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${role}-message`;
+
+        // 创建内容容器
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+        contentDiv.textContent = content;
+        messageDiv.appendChild(contentDiv);
+
+        // 如果有工具使用信息，添加工具信息
+        if (toolsUsed && toolsUsed.length > 0) {
+            const toolsInfoDiv = document.createElement('div');
+            toolsInfoDiv.className = 'tools-info';
+            
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'tools-info-title';
+            titleDiv.textContent = '使用的工具：';
+            toolsInfoDiv.appendChild(titleDiv);
+
+            toolsUsed.forEach(tool => {
+                const toolTag = document.createElement('span');
+                toolTag.className = 'tool-tag';
+                toolTag.textContent = tool;
+                toolsInfoDiv.appendChild(toolTag);
+            });
+
+            messageDiv.appendChild(toolsInfoDiv);
+        }
+
+        // 如果有函数调用，添加函数调用信息
+        if (toolCalls && toolCalls.length > 0) {
+            const functionInfoDiv = document.createElement('div');
+            functionInfoDiv.className = 'function-info';
+
+            const functionTitle = document.createElement('div');
+            functionTitle.className = 'function-title';
+            functionTitle.textContent = '🔧 工具调用详情';
+            functionInfoDiv.appendChild(functionTitle);
+
+            toolCalls.forEach(call => {
+                const functionDetail = document.createElement('div');
+                functionDetail.className = 'function-detail';
+                functionDetail.textContent = call;
+                functionInfoDiv.appendChild(functionDetail);
+            });
+
+            messageDiv.appendChild(functionInfoDiv);
+        }
+
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        saveChatHistory();
+        return messageDiv;
+    }
+
+    // 创建流式消息
+    function createStreamingMessage() {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message assistant-message streaming-message';
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+        messageDiv.appendChild(contentDiv);
+
+        const indicator = document.createElement('span');
+        indicator.className = 'streaming-indicator';
+        contentDiv.appendChild(indicator);
+
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        return { messageDiv, contentDiv };
+    }
+
+    // 处理流式响应
+    async function handleStreamResponse(response) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        
+        let buffer = '';
+        let messageContent = '';
+        let toolCalls = [];
+        let toolsUsed = [];
+        let currentToolCall = null;
+        
+        // 创建流式消息容器
+        const { messageDiv, contentDiv } = createStreamingMessage();
+        currentStreamingMessage = { messageDiv, contentDiv };
+
+        try {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || ''; // 保留最后一个不完整的行
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6).trim();
+                        
+                        if (data === '[DONE]') {
+                            // 流结束
+                            contentDiv.querySelector('.streaming-indicator')?.remove();
+                            messageDiv.classList.remove('streaming-message');
+                            
+                            // 添加工具使用信息
+                            if (toolsUsed.length > 0) {
+                                const toolsInfoDiv = document.createElement('div');
+                                toolsInfoDiv.className = 'tools-info';
+                                
+                                const titleDiv = document.createElement('div');
+                                titleDiv.className = 'tools-info-title';
+                                titleDiv.textContent = '使用的工具：';
+                                toolsInfoDiv.appendChild(titleDiv);
+
+                                toolsUsed.forEach(tool => {
+                                    const toolTag = document.createElement('span');
+                                    toolTag.className = 'tool-tag';
+                                    toolTag.textContent = `${tool.name} (${tool.key})`;
+                                    toolsInfoDiv.appendChild(toolTag);
+                                });
+
+                                messageDiv.appendChild(toolsInfoDiv);
+                            }
+
+                            // 添加工具调用信息
+                            if (toolCalls.length > 0) {
+                                const functionInfoDiv = document.createElement('div');
+                                functionInfoDiv.className = 'function-info';
+
+                                const functionTitle = document.createElement('div');
+                                functionTitle.className = 'function-title';
+                                functionTitle.textContent = '🔧 工具调用详情';
+                                functionInfoDiv.appendChild(functionTitle);
+
+                                toolCalls.forEach(call => {
+                                    const nameDetail = document.createElement('div');
+                                    nameDetail.className = 'function-detail';
+                                    nameDetail.textContent = `函数名: ${call.function.name}`;
+                                    functionInfoDiv.appendChild(nameDetail);
+
+                                    const argsDetail = document.createElement('div');
+                                    argsDetail.className = 'function-detail';
+                                    argsDetail.textContent = '参数:';
+                                    functionInfoDiv.appendChild(argsDetail);
+
+                                    const argsCode = document.createElement('div');
+                                    argsCode.className = 'function-args';
+                                    argsCode.textContent = call.function.arguments;
+                                    functionInfoDiv.appendChild(argsCode);
+                                });
+
+                                messageDiv.appendChild(functionInfoDiv);
+                            }
+
+                            saveChatHistory();
+                            return;
+                        }
+
+                        try {
+                            const chunk = JSON.parse(data);
+                            
+                            // 处理工具信息
+                            if (chunk.type === 'tools_info' && chunk.tools_used) {
+                                toolsUsed = chunk.tools_used;
+                                continue;
+                            }
+
+                            // 处理聊天完成块
+                            if (chunk.choices && chunk.choices[0]) {
+                                const choice = chunk.choices[0];
+                                const delta = choice.delta;
+
+                                if (delta) {
+                                    // 处理文本内容
+                                    if (delta.content) {
+                                        messageContent += delta.content;
+                                        contentDiv.innerHTML = messageContent + '<span class="streaming-indicator"></span>';
+                                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                                    }
+
+                                    // 处理工具调用
+                                    if (delta.tool_calls) {
+                                        for (const toolCallDelta of delta.tool_calls) {
+                                            const index = toolCallDelta.index || 0;
+                                            
+                                            // 确保工具调用数组有足够的元素
+                                            while (toolCalls.length <= index) {
+                                                toolCalls.push({
+                                                    id: '',
+                                                    type: 'function',
+                                                    function: { name: '', arguments: '' }
+                                                });
+                                            }
+
+                                            if (toolCallDelta.id) {
+                                                toolCalls[index].id = toolCallDelta.id;
+                                            }
+
+                                            if (toolCallDelta.function) {
+                                                if (toolCallDelta.function.name) {
+                                                    toolCalls[index].function.name += toolCallDelta.function.name;
+                                                }
+                                                if (toolCallDelta.function.arguments) {
+                                                    toolCalls[index].function.arguments += toolCallDelta.function.arguments;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            console.warn('Failed to parse chunk:', data, e);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Stream reading error:', error);
+            contentDiv.innerHTML = messageContent + ' <span style="color: #ef4444;">[连接中断]</span>';
+            throw error;
+        }
+    }
+
+    // 发送消息
+    async function sendMessage() {
+        const content = messageInput.value.trim();
+        if (!content || isStreaming) return;
+
+        // 设置流式状态
+        isStreaming = true;
+        messageInput.disabled = true;
+        sendButton.disabled = true;
+        sendButtonText.textContent = '发送中...';
+        
+        showStatus('正在发送消息...', 'connecting', 0);
+
+        // 添加用户消息
+        addMessage(content, 'user');
+        messageInput.value = '';
+
+        // 构建消息历史
+        const messages = Array.from(messagesContainer.children)
+            .filter(div => !div.classList.contains('streaming-message'))
+            .map(div => ({
+                role: div.classList.contains('user-message') ? 'user' : 'assistant',
+                content: div.querySelector('.message-content')?.textContent || div.textContent
+            }));
+
+        try {
+            const sessionId = localStorage.getItem('current_stream_session_id');
+            const response = await fetch('/api/chat/completions/stream', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Session-ID': sessionId
+                },
+                body: JSON.stringify({ messages })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            showStatus('正在接收回复...', 'streaming', 0);
+            await handleStreamResponse(response);
+            showStatus('回复完成', 'success');
+
+        } catch (error) {
+            console.error('Error:', error);
+            showStatus(`发送失败: ${error.message}`, 'error');
+            
+            // 移除可能存在的流式消息
+            if (currentStreamingMessage) {
+                currentStreamingMessage.messageDiv.remove();
+            }
+            
+            addMessage('抱歉，发生了错误，请稍后重试。', 'assistant');
+        } finally {
+            // 重置状态
+            isStreaming = false;
+            currentStreamingMessage = null;
+            messageInput.disabled = false;
+            sendButton.disabled = false;
+            sendButtonText.textContent = '发送';
+            messageInput.focus();
+        }
+    }
+
+    // 处理键盘事件
+    function handleKeyDown(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage();
+        }
+    }
+
+    // 自动调整文本框高度
+    messageInput.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    // 页面加载时初始化
+    document.addEventListener('DOMContentLoaded', function () {
+        loadChatHistory();
+        messageInput.focus();
+    });
+
+    // 页面卸载时清理
+    window.addEventListener('beforeunload', function () {
+        if (isStreaming) {
+            // 如果正在流式传输，保存当前状态
+            saveChatHistory();
+        }
+    });
+</script>
+{% endblock %}

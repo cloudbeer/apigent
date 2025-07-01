@@ -1,5 +1,5 @@
 import os
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAI
 import logging
 from dotenv import load_dotenv
 import json
@@ -17,8 +17,10 @@ api_key = os.getenv("OPENAI_API_KEY")
 embedding_model = os.getenv("EMBEDDING_MODEL")
 text_generation_model = os.getenv("TEXT_GENERATION_MODEL")
 
-
+# 同步客户端用于非流式操作
 client = OpenAI(base_url=base_url, api_key=api_key)
+# 异步客户端用于流式操作
+async_client = AsyncOpenAI(base_url=base_url, api_key=api_key)
 
 
 # 向量化工具函数
@@ -107,7 +109,7 @@ def parse_tool_schemas(
     Returns:
         dict: 包含 OpenAI 响应和额外字段的字典
     """
-    print(f"retrieved tools: {tools}")
+    # print(f"retrieved tools: {tools}")
     response: ChatCompletion | None = None
 
     if len(tools) <= 0:
@@ -139,7 +141,7 @@ async def parse_tool_schemas_stream(
     messages: list[ChatCompletionMessage], tools: list[dict]
 ) -> AsyncGenerator[dict, None]:
     """
-    使用 OpenAI 模型解析工具调用 - 流式版本
+    使用 OpenAI 模型解析工具调用 - 真正的异步流式版本
 
     Args:
         messages: 对话历史
@@ -148,18 +150,18 @@ async def parse_tool_schemas_stream(
     Yields:
         dict: OpenAI 流式响应的每个chunk
     """
-    print(f"retrieved tools: {tools}")
+    # print(f"retrieved tools: {tools}")
 
     try:
         if len(tools) <= 0:
-            stream = client.chat.completions.create(
+            stream = await async_client.chat.completions.create(
                 model=text_generation_model,
                 messages=messages,
                 stream=True,
             )
         else:
-            print(f"messages: {messages}")
-            stream = client.chat.completions.create(
+            # print(f"messages: {messages}")
+            stream = await async_client.chat.completions.create(
                 model=text_generation_model,
                 messages=messages,
                 tools=tools,
@@ -167,9 +169,9 @@ async def parse_tool_schemas_stream(
                 stream=True,
             )
 
-        # 逐个yield流式响应的chunk
-        for chunk in stream:
-            # 将chunk转换为字典格式
+        # 使用异步迭代器逐个yield流式响应的chunk
+        async for chunk in stream:
+            # 将chunk转换为字典格式并立即yield
             chunk_dict = chunk.to_dict()
             yield chunk_dict
             

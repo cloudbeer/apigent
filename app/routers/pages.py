@@ -11,11 +11,25 @@ templates = Jinja2Templates(directory="pages")
 
 
 @router.get("/chatbox", response_class=HTMLResponse)
-async def manage_api(request: Request, lang: str = "zh"):
-    """渲染主页"""
+async def chatbox(request: Request, lang: str = "zh"):
+    """渲染聊天页面"""
     translations = get_translations(lang)
     return templates.TemplateResponse(
         "chatbox.html",
+        {
+            "request": request,
+            "lang": lang,
+            "_": translations.gettext
+        }
+    )
+
+
+@router.get("/chatbox-stream", response_class=HTMLResponse)
+async def chatbox_stream(request: Request, lang: str = "zh"):
+    """渲染流式聊天页面"""
+    translations = get_translations(lang)
+    return templates.TemplateResponse(
+        "chatbox-stream.html",
         {
             "request": request,
             "lang": lang,

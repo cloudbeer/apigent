@@ -742,8 +742,8 @@ def calculate_keyword_similarity(query: str, text: str) -> float:
         word for word in text_words if word.strip() and word not in CHINESE_STOPWORDS
     }
 
-    print(f"query_words: {query_words}")
-    print(f"text_words: {text_words}")
+    # print(f"query_words: {query_words}")
+    # print(f"text_words: {text_words}")
     
     # 如果分词后没有有效词汇，回退到字符级匹配
     if not query_words:
