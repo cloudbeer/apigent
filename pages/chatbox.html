@@ -282,7 +282,7 @@
         tools.forEach(tool => {
             const button = document.createElement('button');
             button.className = 'tool-option';
-            button.textContent = tool;
+            button.textContent = tool.name + `(${tool.key})`;
             button.onclick = () => {
                 document.querySelectorAll('.tool-option').forEach(btn => btn.classList.remove('selected'));
                 button.classList.add('selected');
